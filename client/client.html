@@ -15,7 +15,7 @@
                 content.innerHTML += `<p>${obj.message}</p>`;
             }
             else {
-                content.innerHTML += `<p>${JSON.stringify(obj.users)}</p>`;
+                content.innerHTML += `<p>${JSON.stringify(obj.tasks)}</p>`;
             }
         }
     };
@@ -81,7 +81,7 @@
         
         xhr.onload = () => handleResponse(xhr);
         
-        const formData = `name=${nameField.value}&age=${ageField.value}`;
+        const formData = `name=${nameField.value}&date=${ageField.value}`;
         xhr.send(formData);
         
         return false;
@@ -91,11 +91,11 @@
       const nameForm = document.querySelector('#nameForm');
       const userForm = document.querySelector('#userForm');
       
-      const addUser = (e) => sendPost(e, nameForm);
-      const getUsers = (e) => requestUpdate(e, userForm);
+      const addTask = (e) => sendPost(e, nameForm);
+      const getTasks = (e) => requestUpdate(e, userForm);
       
-      nameForm.addEventListener('submit', addUser);
-      userForm.addEventListener('submit', getUsers);
+      nameForm.addEventListener('submit', addTask);
+      userForm.addEventListener('submit', getTasks);
     };
 
     window.onload = init;
@@ -103,24 +103,24 @@
 </head>
 <body>
   <section id="top">
-    <h3>POST Status Code Tests</h3>
-    <form id="nameForm" action="/addUser" method="post">
-      <label for="name">Name: </label>
+    <h3>DueDate App</h3>
+    <form id="nameForm" action="/addTask" method="post">
+      <label for="name">Task Name: </label>
       <input id="nameField" type="text" name="name" />
-      <label for="age">Age: </label>
-      <input id="ageField" type="number" name="age" min="0" max="100" step="1"/>
-      <input type="submit" value="Add User" />
+      <label for="date">Date: </label>
+      <input id="ageField" type="date" name="date"/>
+      <input type="submit" value="Add Task" />
     </form>
-    <form id="userForm" action="/getUsers" method="get">
+    <form id="userForm" action="/getTasks" method="get">
       <select id='urlField'>
-        <option value='/getUsers'>/getUsers</option>
+        <option value='/getTasks'>/getTasks</option>
         <option value='/notReal'>/notReal</option>
       </select>
       <select id="methodSelect">
         <option value="get">GET</option>
         <option value="head">HEAD</option>
       </select>
-      <input type="submit" value="Get User" />
+      <input type="submit" value="Get Tasks" />
     </form>
   </section>
   <section id="content">
