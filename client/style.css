@@ -1,3 +1,7 @@
+* {
+    font-family: 'Roboto', sans-serif;
+}
+
 html, body {
   height: 100%;
   width: 100%;
@@ -5,17 +9,127 @@ html, body {
   padding: 0;
 }
 
-#top {
-  text-align: center;
-  margin: 0 auto;
+h1 {
+    font-family: 'Merriweather', serif;
+    font-size: 3em;
+    padding-left: 1em;
 }
 
-#top h1 {
-  font-size: 2em;
+#introduction {
+    font-size: 1em;
+    padding-left: 3em;
+    padding-right: 3em;
+    padding-bottom: 1em;
+}
+
+#left {
+    margin-top: 1%;
+    margin-bottom: 1%;
+    margin-left: 1%;
+    float: left;
+    text-align: left;
+    border-radius: 25px;
+    background-color: black;
+    width: 48.5%;
+    height: 96%;
+    color: orange;
+    overflow: auto;
+}
+
+#right {
+    margin-top: 1%;
+    margin-bottom: 1%;
+    margin-right: 1%;
+    float: right;
+    text-align: left;
+    border-radius: 25px;
+    background-color: #f2aa4cff;
+    width: 48.5%;
+    height: 96%;
+    color: black;
+    overflow: auto;
 }
 
 #content {
-  margin-top: 100px;
-  font-size: 2em;
-  text-align: center;
+    text-align: left;
+    font-size: 1.2em;
+}
+
+.collapsible {
+    background-color: #333;
+    color: orange;
+    cursor: pointer;
+    padding: 1em 2em;
+    width: 100%;
+    border: 0 solid;
+    text-align: left;
+    font-size: 1.5em;
+}
+
+.active, .collapsible:hover {
+  background-color: #222;
+}
+
+#addContent {
+    background-color: #f2aa4cff;
+    color: black;
+    padding: 1em 2em;
+    text-align: left;
+    font-size: 1.2em;
+    display: none;
+    overflow: hidden;
+}
+
+#getForm {
+    background-color: #333;
+    color: orange;
+    cursor: pointer;
+    padding: 1em 2em;
+    width: 100%;
+    border: 0 solid;
+    text-align: left;
+    font-size: 1.5em;
+}
+
+#getForm:hover {
+    background-color: #222;
+}
+
+#deleteForm {
+    background-color: #333;
+    color: orange;
+    cursor: pointer;
+    padding: 1em 2em;
+    width: 100%;
+    border: 0 solid;
+    text-align: left;
+    font-size: 1.5em;
+}
+
+#deleteForm:hover {
+    background-color: #222;
+}
+
+#leftContent {
+    text-align: center;
+    font-size: 1.5em;
+    margin: 5%;
+}
+
+#descriptionText * {
+    vertical-align: top;
+}
+
+#addDueDate {
+    background-color: #333;
+    color: orange;
+    cursor: pointer;
+    padding: 0.5em 1em;
+    border: 0 solid;
+    text-align: center;
+    font-size: 1em;
+}
+
+#addDueDate:hover {
+    background-color: #222;
 }

@@ -3,53 +3,91 @@
 <head>
   <title>Our simple HTTP server</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
-  
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Roboto&display=swap');
+    </style>
+    
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
-    const parseJSON = (xhr, content) => {
+
+    //parseJSON parses the xhr response into a JSON object which is stringified and deconstructed to individual properties to be displayed on the main 'content' screen.
+    const parseJSON = (xhr, content, leftContent) => {
         if (xhr.response && xhr.getResponseHeader('Content-Type') === 'application/json') {
             const obj = JSON.parse(xhr.response);
             console.dir(obj);
             
+            //if block determines whether the JSON object contains a message or a task (object)
+            //if it is a message, print on left side of screen, else print on right (main content) side of screen
             if (obj.message) {
-                content.innerHTML += `<p>${obj.message}</p>`;
+                leftContent.innerHTML += `<p>${obj.message}</p>`;
+            } else {
+                let tasks = obj.tasks;
+                
+//                content.innerHTML += `<p>${JSON.stringify(obj.tasks)}</p>`;
+                
+                //clear the innerHTML of content to replace with the new list of tasks
+                content.innerHTML = "";
+                
+                //change the background color of each task depending on its priority level property, green for low, yellow/gold for normal, red for high
+                for (let task in tasks) {
+                    if (tasks[task].priority === "low") {
+                        content.innerHTML += `<div style="background-color:springgreen; padding: 0.5em 3em; border-bottom: 1px solid black;">
+                                                <h3>${tasks[task].title} | ${tasks[task].date} | ${tasks[task].time}</h3>
+                                                <p>${tasks[task].description}</p>
+                                            </div>`;
+                    } else if (tasks[task].priority === "high") {
+                        content.innerHTML += `<div style="background-color:red; padding: 0.5em 3em; border-bottom: 1px solid black;">
+                                                <h3>${tasks[task].title} | ${tasks[task].date} | ${tasks[task].time}</h3>
+                                                <p>${tasks[task].description}</p>
+                                            </div>`;
+                    } else {
+                        content.innerHTML += `<div style="background-color:gold; padding: 0.5em 3em; border-bottom: 1px solid black;">
+                                                <h3>${tasks[task].title} | ${tasks[task].date} | ${tasks[task].time}</h3>
+                                                <p>${tasks[task].description}</p>
+                                            </div>`;
+                    }
+                }
+                
             }
-            else {
-                content.innerHTML += `<p>${JSON.stringify(obj.tasks)}</p>`;
-            }
+
         }
     };
-
+    
+    //handleResponse function prints the status code headers and messages to the left side of the screen, also calls parseJSON
     const handleResponse = (xhr) => {
-      const content = document.querySelector('#content');
+        const content = document.querySelector('#content');
+        const leftContent = document.querySelector('#leftContent');
       
+        //status codes/messages to be printed on screen
         switch(xhr.status) {
             case 200:
-                content.innerHTML = '<b>Success</b>';
+                leftContent.innerHTML = '<b>Success!</b>';
                 break;
             case 201:
-                content.innerHTML = '<b>Created</b>';
+                leftContent.innerHTML = '<b>Created!</b>';
                 break;
             case 204:
-                content.innerHTML = '<b>Updated (No Content)</b>';
+                leftContent.innerHTML = '<b>Updated!</b>';
                 break;
             case 400:
-                content.innerHTML = '<b>Bad Request</b>';
+                leftContent.innerHTML = '<b>Bad Request!</b>';
                 break;
             case 404:
-                content.innerHTML = '<b>Resource Not Found</b>';
+                leftContent.innerHTML = '<b>Resource Not Found!</b>';
                 break;
             default:
-                content.innerHTML = 'Error code not implemented by client.'
+                leftContent.innerHTML = 'Error code not implemented by client.'
                 break;
         }
         
-        parseJSON(xhr, content);
+        parseJSON(xhr, content, leftContent);
     };
     
-    const requestUpdate = (e, userForm) => {
-        const url = userForm.querySelector('#urlField').value;
-        const method = userForm.querySelector('#methodSelect').value;
+    //requestUpdate function sends a GET request that allows user to retrieve the list of tasks
+    const requestUpdate = (e) => {
+        const url = '/getTasks';
+        const method = 'GET';
         
         const xhr = new XMLHttpRequest();
         xhr.open(method, url);
@@ -63,67 +101,143 @@
         e.preventDefault();
         return false;
     }
-
-    const sendPost = (e, nameForm) => {
-        e.preventDefault();
-        
-        const nameAction = nameForm.getAttribute('action');
-        const nameMethod = nameForm.getAttribute('method');
-        
-        const nameField = nameForm.querySelector('#nameField');
-        const ageField = nameForm.querySelector('#ageField');
+    
+    //requestDelete function sends a DELETE request that allows user to clear the list of tasks
+    const requestDelete = (e) => {
+        const url = '/deleteTask';
+        const method = 'DELETE';
         
         const xhr = new XMLHttpRequest();
-        xhr.open(nameMethod, nameAction);
+        xhr.open(method, url);
+        
+        xhr.setRequestHeader('Accept', 'application/json');
+        
+        xhr.onload = () => handleResponse(xhr);
+        
+        xhr.send();
+        
+        e.preventDefault();
+        return false;
+    }
+    
+    //sendPost function sends a POST request that allows user to add an object (task) to tasks
+    const sendPost = (e, addForm) => {
+        e.preventDefault();
+        
+        const addAction = addForm.getAttribute('action');
+        const addMethod = addForm.getAttribute('method');
+        
+        //each field represents each property to be added to the json object (task)
+        const titleField = addForm.querySelector('#titleField');
+        const dateField = addForm.querySelector('#dateField');
+        const descriptionField = addForm.querySelector('#descriptionField');
+        const priorityField = addForm.querySelector('#priorityField');
+        const timeField = addForm.querySelector('#timeField');
+        let priority = "normal";
+        if (priorityField.querySelector('#low').checked) {
+            priority = "low";
+        }
+        else if (priorityField.querySelector('#high').checked) {
+            priority = "high";
+        }
+        
+        const xhr = new XMLHttpRequest();
+        xhr.open(addMethod, addAction);
         
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         
         xhr.onload = () => handleResponse(xhr);
         
-        const formData = `name=${nameField.value}&date=${ageField.value}`;
+        const formData = `title=${titleField.value}&date=${dateField.value}&time=${timeField.value}&description=${descriptionField.value}&priority=${priority}`;
         xhr.send(formData);
         
         return false;
     };
-
+    
+    //init function calls sendPost, requestUpdate and requestDelete when the buttons for 'Create/Update a DueDate', 'View Updated DueDate List' and 'Clear DueDate List' are clicked respectively
     const init = () => {
-      const nameForm = document.querySelector('#nameForm');
-      const userForm = document.querySelector('#userForm');
-      
-      const addTask = (e) => sendPost(e, nameForm);
-      const getTasks = (e) => requestUpdate(e, userForm);
-      
-      nameForm.addEventListener('submit', addTask);
-      userForm.addEventListener('submit', getTasks);
+        const addForm = document.querySelector('#addForm');
+        const getForm = document.querySelector('#getForm');
+        const deleteForm = document.querySelector('#deleteForm');
+        
+        //functions that call sendPost, requestUpdate and requestDelete
+        const addTask = (e) => sendPost(e, addForm);
+        const getTasks = (e) => requestUpdate(e);
+        const deleteTask = (e) => requestDelete(e);
+        
+        //when buttons are clicked, call functions created above
+        addForm.addEventListener('submit', addTask);
+        getForm.addEventListener('click', getTasks);
+        deleteForm.addEventListener('click', deleteTask);
     };
 
     window.onload = init;
+    
+    //Code template taken from https://www.w3schools.com/howto/howto_js_collapsible.asp
+    //Keeps the contents of 'Create/Update a DueDate' hidden until clicked on
+    let collapsible = document.querySelectorAll(".collapsible");
+    for (let i = 0; i < collapsible.length; i++) {
+        collapsible[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            let content = this.nextElementSibling;
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                content.style.display = "block";
+            }
+        });
+    }
   </script>
 </head>
 <body>
-  <section id="top">
-    <h3>DueDate App</h3>
-    <form id="nameForm" action="/addTask" method="post">
-      <label for="name">Task Name: </label>
-      <input id="nameField" type="text" name="name" />
-      <label for="date">Date: </label>
-      <input id="ageField" type="date" name="date"/>
-      <input type="submit" value="Add Task" />
-    </form>
-    <form id="userForm" action="/getTasks" method="get">
-      <select id='urlField'>
-        <option value='/getTasks'>/getTasks</option>
-        <option value='/notReal'>/notReal</option>
-      </select>
-      <select id="methodSelect">
-        <option value="get">GET</option>
-        <option value="head">HEAD</option>
-      </select>
-      <input type="submit" value="Get Tasks" />
-    </form>
-  </section>
-  <section id="content">
-  </section>
+    <section id="left">
+        <h1>DueDate</h1>
+        <p id="introduction">Welcome to DueDate, the #1 planner app in the world! Planners were great inventions until the new generation forgot how to write...so DueDate adapted along with technology to keep the idea of organizing events, plans, tasks, and many more, alive.</p>
+        
+        <button type="button" class="collapsible">Create/Update a DueDate</button>
+        <div id="addContent">
+            <form id="addForm" action="/addTask" method="post">
+                <label for="titleField">Title: </label>
+                <input id="titleField" type="text" name="title">
+                <p></p>
+                <label for="dateField">Due Date: </label>
+                <input id="dateField" type="date" name="date">
+                <label for="timeField">Time: </label>
+                <input id="timeField" type="time" name="time">
+                <p></p>
+                <div id=descriptionText>
+                    <label for="descriptionField">Description: </label>
+                    <textarea id="descriptionField" name="description"></textarea>
+                </div>
+                <p></p>
+                <div id="priorityField">
+                    <label>Priority: </label>
+                    
+                    <input id="low" type="radio" name="priority" value="low">
+                    <label for="low">Low</label>
+                    
+                    <input id="normal" type="radio" name="priority" value="normal" checked>
+                    <label for="normal">Normal</label>
+                    
+                    <input id="high" type="radio" name="priority" value="high">
+                    <label for="high">High</label>
+                </div>
+                <p></p>
+                <input id="addDueDate" type="submit" value="Add/Update">
+            </form>
+        </div>
+        <button type="button" id="getForm">View Updated DueDates List</button>
+        <button type="button" id="deleteForm">Clear DueDates List</button>
+        <div id="leftContent">
+        
+        </div>
+    </section>
+    
+    <section id="right">
+        <div id="content">
+            
+        </div>
+    </section>
 </body>
 </html>
